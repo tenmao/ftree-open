@@ -1,0 +1,107 @@
+{
+	"info": {
+		"_postman_id": "e960d0e2-e883-454b-b453-e4bd2bcd6b0d",
+		"name": "FengyeTreeOpenApi",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "outer/user - getAuthToken",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{auth}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"appId\": \"hello\",\n    \"shopId\": \"111\",\n    \"userInfo\": {\n        \"userId\": \"user1\",\n        \"openId\": \"openId1\",\n        \"userName\": \"userName1\",\n        \"userPortrait\": \"userPortrait1\"\n    }\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{c-server}}/api/fybrand/open/auth/outer/user/getAuthToken",
+					"host": [
+						"{{c-server}}"
+					],
+					"path": [
+						"api",
+						"fybrand",
+						"open",
+						"auth",
+						"outer",
+						"user",
+						"getAuthToken"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"//从环境变量读取bizAppId和bizAppSecret",
+					"const bizAppId = pm.environment.get(\"bizAppId\")",
+					"const bizAppSecret = pm.environment.get(\"bizAppSecret\")",
+					"",
+					"if (!bizAppId || !bizAppSecret) {",
+					"    //如果不存在就直接抛出异常，这样就会弹出错误信息，同时不会再执行请求",
+					"    throw new Error(\"请先在环境变量中配置bizAppId和bizAppSecret\")",
+					"}",
+					"",
+					"//计算签名 - 获取计算签名的数据",
+					"var method = request.method;",
+					"var canonicalUrl = pm.request.url.getPathWithQuery();",
+					"console.log(`canonicalUrl=${canonicalUrl}`);",
+					"var data = pm.request.body.raw;",
+					"if (!data) {",
+					"    data = \"\";",
+					"}",
+					"",
+					"var now = Date.now();",
+					"var timestamp = Math.round(now / 1000);",
+					"var nonce = now;",
+					"",
+					"",
+					"var message = method + \"\\n\"",
+					"+ canonicalUrl + \"\\n\"",
+					"+ timestamp + \"\\n\"",
+					"+ nonce + \"\\n\"",
+					"+ data + \"\\n\";",
+					"",
+					"",
+					"//计算签名 - 第一次摘要（针对时间戳）",
+					"var signature = CryptoJS.HmacSHA256(message, bizAppSecret).toString(CryptoJS.enc.Hex);",
+					"",
+					"console.log(`bizAppId=${bizAppId}\\nbizAppSecret=${bizAppSecret}\\nmessage=${message}\\nsignature=${signature}`)",
+					"",
+					"//签名信息设置到环境变量",
+					"pm.environment.set(\"timestamp\", timestamp)",
+					"pm.environment.set(\"signature\", signature)",
+					"",
+					"var auth = `HmacSHA256 bizAppId=${bizAppId}&timestamp=${timestamp}&nonce=${nonce}&signature=${signature}`;",
+					"pm.environment.set(\"auth\", auth)"
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	]
+}
