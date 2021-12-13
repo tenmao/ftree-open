@@ -51,12 +51,12 @@
 				"type": "text/javascript",
 				"exec": [
 					"//从环境变量读取bizAppId和bizAppSecret",
-					"const bizAppId = pm.environment.get(\"bizAppId\")",
-					"const bizAppSecret = pm.environment.get(\"bizAppSecret\")",
+					"const bizAppId = pm.variables.get(\"bizAppId\")",
+					"const bizAppSecret = pm.variables.get(\"bizAppSecret\")",
 					"",
 					"if (!bizAppId || !bizAppSecret) {",
 					"    //如果不存在就直接抛出异常，这样就会弹出错误信息，同时不会再执行请求",
-					"    throw new Error(\"请先在环境变量中配置bizAppId和bizAppSecret\")",
+					"    throw new Error(\"请先配置变量bizAppId和bizAppSecret\")",
 					"}",
 					"",
 					"//计算签名 - 获取计算签名的数据",
@@ -102,6 +102,12 @@
 					""
 				]
 			}
+		}
+	],
+	"variable": [
+		{
+			"key": "name",
+			"value": "collection_tenmao"
 		}
 	]
 }
